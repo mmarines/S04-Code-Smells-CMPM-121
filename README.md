@@ -49,4 +49,71 @@ The idea is also known as the [DRY principle](https://en.wikipedia.org/wiki/Don%
 
 Other Code Smells:
 Loops 
+# Loops
+
+## Introduction
+
+### What is it?
+
+The Loops smell is when a plain `for` or `while` loop does work that a pipeline of operations like `filter` and `map` could express more clearly. Loops have been around since the earliest languages, but Fowler argues they've become outdated, like old fashion trends (p. XX).
+
+### Why does it happen?
+
+Mostly, history. When the first edition of *Refactoring* came out, Fowler and Beck already disliked loops, but languages like Java didn't offer a better option. Now that first-class functions are widely supported, that excuse is gone (p. XX). Habit also plays a part, since loops are one of the first things we learn.
+
+### Why is it a problem?
+
+A loop mixes the "what" with the "how," so you have to read the whole body to understand it. Pipeline operations make it easier to see which elements are processed and what happens to them (p. XX). Loops also need temporary variables, and they can quietly grow to do several unrelated jobs.
+
+## Prevention and Refactoring
+
+Fowler's main fix is **[Replace Loop with Pipeline](https://refactoring.com/catalog/replaceLoopWithPipeline.html)** (p. 231): figure out what the loop is doing (filtering, transforming, totaling) and swap in the matching pipeline operation. If one loop has several jobs, **[Split Loop](https://refactoring.com/catalog/splitLoop.html)** is a good first step.
+
+To prevent it, ask yourself before writing a loop: "Am I filtering, transforming, or totaling?" If so, there's probably a built-in for it. Keep each loop to one job, and keep pipelines short.
+
+## Code Examples
+
+### Example 1 (JavaScript): Replace Loop with Pipeline
+
+**The smell.** This loop collects the names of enemies that are still alive:
+
+```js
+const aliveNames = [];
+for (const enemy of enemies) {
+  if (enemy.health > 0) {
+    aliveNames.push(enemy.name);
+  }
+}
+```
+
+**What's wrong with it.** You have to read the whole body to see that the `if` is a filter and the `push` picks one field. It also needs a temporary array.
+
+**The fix.**
+
+```js
+const aliveNames = enemies
+  .filter(enemy => enemy.health > 0)
+  .map(enemy => enemy.name);
+```
+
+Now it reads like a sentence: "take the enemies, keep the ones with health left, get their names."
+
+### Example 2 (Python): the same idea in another language
+
+**The smell.**
+
+```python
+emails = []
+for order in orders:
+    if order.total > 100:
+        emails.append(order.customer_email)
+```
+
+**The fix.** Python's version of a pipeline is the list comprehension:
+
+```python
+emails = [order.customer_email for order in orders if order.total > 100]
+```
+
+Same refactoring, same benefit: no temporary list, and the intent is clear at a glance.
 Split Variables
