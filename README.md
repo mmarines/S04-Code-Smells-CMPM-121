@@ -27,7 +27,7 @@ Some common reasons why we may write Duplicate Code:
 
 - **Copy-paste deadline pressure.** Copying a working function and editing a few values is the fastest way to ship features. Something we're all a victim of. Fowler describes exactly this: copy the function, change the values, and you've created duplicated code (p. 50).
 - **Parallel work.** Two developers solve the same problem independently, in different files or branches.
-- **If it ain't broke, don't fix it** Nobody wants to change a shared function that others rely on, so they clone it.
+- **If it ain't broke, don't fix it.** Nobody wants to change a shared function that others rely on, so they clone it.
 - **Skipped cleanup.** The feature works throughout the program, so the refactoring step is skipped. Fowler's **Rule of Three** says: *"Three strikes and you refactor"* (p. 50). Copying once is tolerable, but a third copy means it's time to consolidate.
 
 ### Why is it a problem?
@@ -105,18 +105,36 @@ Now we have a parameterized print function that can print stats based on the cal
 
 ### Example 2 (JavaScript): Pull Up Method
 
-**The Smell.** 
+**The Smell.** This code shows an example of a class that handles Mario powerups. The Powerup class has subclasses for a Fire Flower or Ice Flower respectively, and each subclass contains its own method for returning its unique character model.
 
 ```js
+class Powerup {...}
+
+class FireFlower extends Powerup {
+  get powerUpModel() {...}
+}
+
+class IceFlower extends Powerup {
+  get powerUpModel() {...}
+}
 ```
 
 **What's wrong with it.** 
+Both subclasses repeat the same `powerUpModel` getter, which is duplicate behavior. If the naming rule changes later, it must be updated in multiple places. This also provides a weakpoint for bugs when calling functions with similar names. 
 
 **The Fix.** 
-
 ```js
+class Powerup {
+  get powerUpModel() {
+    return this._model;
+  }
+}
+
+class FireFlower extends Powerup {}
+class IceFlower extends Powerup {}
 ```
 
+Move the shared getter into the base class so each subclass inherits it instead of reimplementing it. This allows each powerup to call a retrieval of their model,  no matter the specific type it is. If there are features from subclasses that are not on the superclass, we may need to use **[Pull Up Field](https://refactoring.com/catalog/pullUpField.html)** (p. 353).
 
 # Loops
 
