@@ -45,10 +45,79 @@ The idea is also known as the [DRY principle](https://en.wikipedia.org/wiki/Don%
 
 ## Prevention and Refactoring
 
+Fowler's listed fixes for the Duplicated Code smell is **[Extract Function](https://refactoring.com/catalog/extractFunction.html)** (p. 106), **[Slide Statements](https://refactoring.com/catalog/slideStatements.html)** (p. 223), and **[Pull Up Method](https://refactoring.com/catalog/pullUpMethod.html)** (p. 350). Fowler explains situations to use each, for example **Extract Function** can be used where you see the same expression or code block in more than one place. 
+
+### Some Common Prevention Practices
+
+1. **Follow the Rule of Three.** Tolerate one copy, wince at the second, and refactor at the third.
+2. **Keep functions small and well named.** Small, intention-revealing functions are easy to reuse, so people call them instead of rewriting them.
+3. **Maintain good tests.** A solid test suite removes the fear that makes people copy code instead of changing it.
+4. **Review for duplication.** Put "does this already exist?" on your pull-request checklist.
+
+### How to Refactor
+
+1. Differentiate copies to find out exactly what differs. 
+2. If code is scattered, use **Slide Statements** to bring associated code together. 
+3. Use **Extract Function** to pull out shared systems. 
+4. Turn differences into necessary parameters, or use **Pull Up Method** to pull shared behavior up in class hierarchies. 
+5. Replace duplicated code with a call, testing after small changes so that behavior is preserved. 
+
+## Code Examples
+
+### Example 1 (Python): Extract Function
+
+**The Smell.** This code exhibits 3 Mobs with different base stats depending on which Mob is declared. They independently print each of their base stats such as Name, Health, Strength, Durability, etc. 
+
+```python
+# Set of mob classes with different base stats
+slime = Mob("Slime")
+for stat in slime:
+    print(f"{stat.name}: {stat.value}")
+    
+goblin = Mob("Goblin")
+for stat in goblin:
+    print(f"{stat.name}: {stat.value}")
+
+mimic = Mob("Mimic")
+for stat in mimic:
+    print(f"{stat.name}: {stat.value}")
+```
+
+**What's wrong with it.** Each Mob uses similar loops to print their stats, leaving bulky duplicate code. We can clean up our codebase and make it easier to read by extracting a function that prints stats for a Mob.
+
+**The Fix.**
+```python
+def printStats(mob: Mob) -> None:
+    for stat in mob:
+    print(f"{stat.name}: {stat.value}")
+
+# Set of mob classes with different base stats
+slime = Mob("Slime")
+goblin = Mob("Goblin")
+mimic = Mob("Mimic")
+
+printStats(slime)
+printStats(goblin)
+printStats(mimic)
+```
+
+Now we have a parameterized print function that can print stats based on the calling mob. The function also allows us to add new mobs in the future without having to worry about implementing a way to print their stats. This also shows whoever is reading our codebase that this section prints stats for all of our mobs without having to read through each individual loop.
+
+### Example 2 (JavaScript): Pull Up Method
+
+**The Smell.** 
+
+```js
+```
+
+**What's wrong with it.** 
+
+**The Fix.** 
+
+```js
+```
 
 
-Other Code Smells:
-Loops 
 # Loops
 
 ## Introduction
