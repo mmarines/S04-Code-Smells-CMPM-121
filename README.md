@@ -146,11 +146,11 @@ The Loops smell is when a plain `for` or `while` loop does work that a pipeline 
 
 ### Why does it happen?
 
-Mostly, history. When the first edition of *Refactoring* came out, Fowler and Beck already disliked loops, but languages like Java didn't offer a better option. Now that first-class functions are widely supported, that excuse is gone (p. XX). Habit also plays a part, since loops are one of the first things we learn.
+Mostly, history. When the first edition of *Refactoring* came out, Fowler and Beck already disliked loops, but languages like Java didn't offer a better option. Now that first-class functions are widely supported, that excuse is gone (p. 79). Habit also plays a part, since loops are one of the first things we learn.
 
 ### Why is it a problem?
 
-A loop mixes the "what" with the "how," so you have to read the whole body to understand it. Pipeline operations make it easier to see which elements are processed and what happens to them (p. XX). Loops also need temporary variables, and they can quietly grow to do several unrelated jobs.
+A loop mixes the "what" with the "how," so you have to read the whole body to understand it. Pipeline operations make it easier to see which elements are processed and what happens to them (p. 79). Loops also need temporary variables, and they can quietly grow to do several unrelated jobs.
 
 ## Prevention and Refactoring
 
