@@ -203,4 +203,118 @@ emails = [order.customer_email for order in orders if order.total > 100]
 ```
 
 Same refactoring, same benefit: no temporary list, and the intent is clear at a glance.
-Split Variables
+
+# Split Variables
+
+## Introduction
+
+### What is it?
+
+The problem here is using the same variable for more than one responsibility. For example, a variable named `temp` might first hold an enemy's attack damage, then get reused to hold its gold reward. The code may work, but the reader has to keep track of when the variable changes meaning.
+
+Fowler's refactoring for this is **[Split Variable](https://refactoring.com/catalog/splitVariable.html)**: give each responsibility its own variable (p. 240). He also recommends it in the **Mutable Data** smell discussion when a variable is updated to store different things (p. 75). These references are from *[Refactoring: Improving the Design of Existing Code, Second Edition](https://drive.google.com/file/d/1C718AhqcmPB2kEdZjufWBKfkKZuUkTJo/view)*.
+
+### Why does it happen?
+
+Sometimes we're halfway through writing a function and already have a variable available, so we reuse it instead of creating another one. It saves a name now, but makes the code harder to follow later.
+
+Some common reasons:
+
+- **Reusing temporary variables.** Names like `temp` or `value` are general enough that we start putting unrelated results into them.
+- **Growing functions.** A variable starts with one purpose, but gains another as more calculations are added.
+- **Changing input parameters.** A parameter holds the original input, then gets reassigned to hold the calculated result. Fowler demonstrates this case on pp. 242–243.
+
+### Why is it a problem?
+
+Fowler explains that using one variable for different responsibilities makes the code confusing to read (p. 240). Its name can no longer clearly describe everything it represents.
+
+Common problems include:
+
+- **Changing meaning.** Readers must track assignments to understand what a variable currently holds.
+- **Lost intermediate values.** Reassigning a variable overwrites a value that may be useful later.
+- **Risky changes.** Moving a calculation or adding a new use can accidentally read the wrong value.
+
+Not every reassignment is a problem. Fowler specifically distinguishes loop counters and collecting variables, such as a running total, from variables that hold unrelated results (p. 240). Updating a score total still serves one responsibility.
+
+## Prevention and Refactoring
+
+Fowler's main fix is **[Split Variable](https://refactoring.com/catalog/splitVariable.html)** (pp. 240–243). Instead of making one variable represent several concepts, create a separate variable for each purpose.
+
+### Some Common Prevention Practices
+
+1. **Use specific names.** Names like `attackDamage` and `goldReward` make the purpose clearer than `temp`.
+2. **Keep each variable focused.** Before reassigning it, check whether the new value represents the same concept.
+3. **Use immutable bindings where possible.** For example, JavaScript's `const` prevents reassignment (p. 241).
+4. **Separate inputs from results.** Keep the original parameter and use a separate variable for the evolving result (pp. 242–243).
+
+### How to Refactor
+
+Following Fowler's mechanics (pp. 240–241):
+
+1. Find the variable's assignments and identify its different responsibilities.
+2. Rename the variable at its declaration to describe its first purpose.
+3. Update its uses up to the next assignment.
+4. At that assignment, introduce a new variable for the next purpose.
+5. Test after each small change and repeat until the responsibilities are separated.
+
+If the variable is accumulating a value, check its role before splitting it. A running total does not need a separate variable for every addition.
+
+## Code Examples
+
+### Example 1 (JavaScript): Separate Unrelated Calculations
+
+**The Smell.** This code calculates an enemy's attack damage and gold reward using the same temporary variable.
+
+```js
+let temp = enemy.strength * 2;
+console.log(`Damage: ${temp}`);
+
+temp = enemy.level * 10;
+console.log(`Gold: ${temp}`);
+```
+
+**What's wrong with it.** `temp` represents two different things. We have to read each assignment to know which value it holds, and the damage value is overwritten when the reward is calculated.
+
+**The Fix.**
+
+```js
+const attackDamage = enemy.strength * 2;
+console.log(`Damage: ${attackDamage}`);
+
+const goldReward = enemy.level * 10;
+console.log(`Gold: ${goldReward}`);
+```
+
+Each calculation now has its own name and variable. The output stays the same, but we can understand the values without tracing assignments. This applies the same approach Fowler introduces on p. 240.
+
+### Example 2 (Python): Separate an Input from the Result
+
+**The Smell.** This function calculates damage after a critical hit and the enemy's armor.
+
+```python
+def calculate_damage(base_damage, armor, critical_hit):
+    if critical_hit:
+        base_damage *= 2
+
+    base_damage = max(0, base_damage - armor)
+    return base_damage
+```
+
+**What's wrong with it.** `base_damage` starts as the original input, but later holds the final damage. Its name becomes misleading after the calculations. This is similar to Fowler's example of assigning to an input parameter (pp. 242–243).
+
+**The Fix.**
+
+```python
+def calculate_damage(base_damage, armor, critical_hit):
+    result = base_damage
+
+    if critical_hit:
+        result *= 2
+
+    result = max(0, result - armor)
+    return result
+```
+
+Now `base_damage` keeps its original meaning, while `result` holds the damage being calculated. The function returns the same value as before, and the original input remains available if we need it later.
+
+`result` is still updated several times, which is fine: each update contributes to the same damage calculation. The goal is to separate responsibilities, not eliminate every reassignment.
